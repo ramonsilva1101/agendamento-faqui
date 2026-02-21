@@ -41,14 +41,13 @@ if "code" in query_params and st.session_state.user_email is None:
         st.query_params.clear()
         st.rerun()
 
-# --- TELA DE LOGIN INVERTIDA (CARD ROXO / FUNDO BRANCO) ---
+# --- TELA DE LOGIN (CORREÇÃO DE CHAVES f-string) ---
 if st.session_state.user_email is None:
     # Lógica para converter logo para Base64
     try:
         with open("static/logo.png", "rb") as f:
             encoded_logo = base64.b64encode(f.read()).decode()
-            logo_html = f'<img src="data:image/png;base64,{encoded_logo}" style="width: 180px; margin-bottom: 20px; filter: brightness(0) invert(1);">' 
-            # O filter acima deixa a logo branca caso ela seja escura, para contrastar com o roxo
+            logo_html = f'<img src="data:image/png;base64,{encoded_logo}" style="width: 180px; margin-bottom: 20px;">'
     except:
         logo_html = '<h1 style="color: white; margin-bottom: 20px;">FAQUI</h1>'
 
@@ -61,19 +60,17 @@ if st.session_state.user_email is None:
     login_url = f"{AUTHORIZATION_URL}?{urllib.parse.urlencode(params)}"
     google_icon = "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
 
-    # CSS Customizado
+    # CSS com Chaves Duplas {{ }} para não conflitar com a f-string
     st.markdown(f"""
         <style>
-        #MainMenu {{visibility: hidden;}}
-        header {{visibility: hidden;}}
-        footer {{visibility: hidden;}}
+        #MainMenu {{ visibility: hidden; }}
+        header {{ visibility: hidden; }}
+        footer {{ visibility: hidden; }}
         
-        /* Fundo Branco Limpo */
         .stApp {{
             background-color: #ffffff !important;
         }}
 
-        /* Container Principal */
         .login-wrapper {{
             display: flex;
             justify-content: center;
@@ -82,7 +79,6 @@ if st.session_state.user_email is None:
             width: 100%;
         }}
 
-        /* Card Roxo Institucional */
         .login-card {{
             background: linear-gradient(145deg, #2D1B4E 0%, #1a1030 100%);
             padding: 50px 40px;
