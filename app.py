@@ -41,15 +41,16 @@ if "code" in query_params and st.session_state.user_email is None:
         st.query_params.clear()
         st.rerun()
 
-# --- TELA DE LOGIN ESTILO "FLOQ" (CARD CENTRALIZADO) ---
+# --- TELA DE LOGIN INVERTIDA (CARD ROXO / FUNDO BRANCO) ---
 if st.session_state.user_email is None:
-    # Lógica para ler a imagem da logo e converter para Base64 (necessário para o HTML)
+    # Lógica para converter logo para Base64
     try:
         with open("static/logo.png", "rb") as f:
             encoded_logo = base64.b64encode(f.read()).decode()
-            logo_html = f'<img src="data:image/png;base64,{encoded_logo}" style="width: 180px; margin-bottom: 20px;">'
+            logo_html = f'<img src="data:image/png;base64,{encoded_logo}" style="width: 180px; margin-bottom: 20px; filter: brightness(0) invert(1);">' 
+            # O filter acima deixa a logo branca caso ela seja escura, para contrastar com o roxo
     except:
-        logo_html = '<h1 style="color: #004A8D; margin-bottom: 20px;">FAQUI</h1>'
+        logo_html = '<h1 style="color: white; margin-bottom: 20px;">FAQUI</h1>'
 
     # Link do Google
     params = {
@@ -67,9 +68,9 @@ if st.session_state.user_email is None:
         header {{visibility: hidden;}}
         footer {{visibility: hidden;}}
         
-        /* Fundo em degradê roxo/azul */
+        /* Fundo Branco Limpo */
         .stApp {{
-            background: linear-gradient(180deg, #1a2a6c 0%, #2D1B4E 50%, #000000 100%) !important;
+            background-color: #ffffff !important;
         }}
 
         /* Container Principal */
@@ -77,16 +78,16 @@ if st.session_state.user_email is None:
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: 90vh;
             width: 100%;
         }}
 
-        /* O Card estilo FLOQ */
+        /* Card Roxo Institucional */
         .login-card {{
-            background-color: white;
+            background: linear-gradient(145deg, #2D1B4E 0%, #1a1030 100%);
             padding: 50px 40px;
-            border-radius: 25px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(45, 27, 78, 0.3);
             text-align: center;
             width: 380px;
             display: flex;
@@ -95,17 +96,17 @@ if st.session_state.user_email is None:
         }}
 
         .welcome-text {{
-            color: #333;
-            font-size: 22px;
+            color: #ffffff;
+            font-size: 24px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             font-family: 'Segoe UI', sans-serif;
         }}
 
         .sub-text {{
-            color: #666;
+            color: #d1d5db;
             font-size: 14px;
-            margin-bottom: 40px;
+            margin-bottom: 35px;
         }}
 
         .google-btn {{
@@ -113,21 +114,20 @@ if st.session_state.user_email is None:
             align-items: center;
             justify-content: center;
             background-color: white;
-            color: #555;
+            color: #2D1B4E;
             width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 15px;
             transition: 0.3s;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }}
 
         .google-btn:hover {{
-            background-color: #f8f9fa;
-            border-color: #ccc;
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }}
         </style>
 
@@ -135,9 +135,9 @@ if st.session_state.user_email is None:
             <div class="login-card">
                 {logo_html}
                 <div class="welcome-text">Bem-vindo</div>
-                <div class="sub-text">Acesso restrito ao Sistema de Agendamento</div>
+                <div class="sub-text">Sistema de Agendamento FAQUI</div>
                 <a href="{login_url}" class="google-btn" target="_self">
-                    <img src="{google_icon}" style="width: 20px; margin-right: 15px;">
+                    <img src="{google_icon}" style="width: 20px; margin-right: 12px;">
                     Entrar com o Google
                 </a>
             </div>
@@ -148,7 +148,7 @@ if st.session_state.user_email is None:
 # --- ÁREA LOGADA ---
 st.title("📅 Painel de Agendamento")
 st.sidebar.image("static/logo.png", width=120)
-st.sidebar.write(f"Conectado como: {st.session_state.user_email}")
+st.sidebar.write(f"Conectado: {st.session_state.user_email}")
 if st.sidebar.button("Sair"):
     st.session_state.user_email = None
     st.rerun()
