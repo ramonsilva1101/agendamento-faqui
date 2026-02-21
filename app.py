@@ -43,87 +43,108 @@ if "code" in query_params and st.session_state.user_email is None:
         st.query_params.clear()
         st.rerun()
 
-# --- TELA DE LOGIN ESTILIZADA ---
+# --- TELA DE LOGIN (CARD BRANCO COM FUNDO AZUL) ---
 if st.session_state.user_email is None:
-    # Injeção de CSS para o Card e esconder menus
+    # Injeção de CSS Avançado para Centralização Total e Cores
     st.markdown("""
         <style>
         #MainMenu {visibility: hidden;}
         header {visibility: hidden;}
         footer {visibility: hidden;}
         
-        /* Fundo da tela */
+        /* Fundo Azul Institucional */
         .stApp {
-            background-color: #f0f2f5;
+            background: linear-gradient(135deg, #004A8D 0%, #002D57 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        /* Estilo do Card */
+        /* Container Principal do Card */
+        .main-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Estilo do Card Branco */
         .login-card {
             background-color: #ffffff;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 50px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
             text-align: center;
+            width: 100%;
             max-width: 400px;
-            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
-        .azul-faqui {
-            color: #004A8D; /* Azul Institucional - ajuste se necessário */
+        /* Ajuste da logo dentro do card */
+        .logo-img {
+            max-width: 200px;
+            margin-bottom: 20px;
+        }
+
+        .titulo-login {
+            color: #004A8D;
+            font-size: 24px;
             font-weight: bold;
+            margin-bottom: 10px;
+            font-family: 'sans-serif';
+        }
+
+        .subtitulo-login {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 30px;
         }
         </style>
         """, unsafe_allow_html=True)
 
-    # Centralização vertical manual
-    st.write("")
-    st.write("")
-    st.write("")
-
-    # Construção do Card em HTML
-    # Note que para a imagem funcionar dentro do HTML, o Streamlit prefere st.image
-    # Então vamos dividir o card em partes:
+    # Construção do Layout centralizado usando Colunas para "empurrar" pro meio
+    empty1, central_col, empty2 = st.columns([0.1, 0.8, 0.1])
     
-    col1, col2, col3 = st.columns([1, 4, 1])
-    with col2:
-        with st.container():
-            # Início do Card (HTML)
-            st.markdown('<div class="login-card">', unsafe_allow_html=True)
-            
-            # Logo
-            try:
-                st.image("static/logo.png", width=180)
-            except:
-                st.markdown("<h1 style='color: #004A8D;'>FAQUI</h1>", unsafe_allow_html=True)
-            
-            # Textos
-            st.markdown("<h2 class='azul-faqui' style='margin-top: 20px;'>Portal do Professor</h2>", unsafe_allow_html=True)
-            st.markdown("<p style='color: #6b7280; margin-bottom: 30px;'>Acesso restrito ao Sistema de Agendamento.</p>", unsafe_allow_html=True)
-            
-            # Botão do Google
-            params = {
-                "client_id": CLIENT_ID, "redirect_uri": REDIRECT_URI,
-                "response_type": "code", "scope": "openid email profile",
-                "access_type": "offline", "prompt": "select_account"
-            }
-            login_url = f"{AUTHORIZATION_URL}?{urllib.parse.urlencode(params)}"
-            google_logo = "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-            
-            st.markdown(f'''
-                <a href="{login_url}" target="_self" style="text-decoration: none;">
-                    <div style="display: flex; align-items: center; justify-content: center; background-color: white; color: #757575; padding: 10px; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                        <img src="{google_logo}" style="width: 18px; height: 18px; margin-right: 10px;">
-                        <span style="font-size: 14px; font-weight: 500; font-family: 'Roboto', sans-serif;">Entrar com o Google</span>
-                    </div>
-                </a>
-            ''', unsafe_allow_html=True)
-            
-            # Fim do Card
-            st.markdown('</div>', unsafe_allow_html=True)
+    with central_col:
+        # Iniciamos o Card
+        st.markdown('<div class="login-card">', unsafe_allow_html=True)
+        
+        # Logo Centralizada (usamos st.image com container_width=False para não esticar)
+        try:
+            st.image("static/logo.png", width=220)
+        except:
+            st.markdown("<h1 style='color: #004A8D;'>FAQUI</h1>", unsafe_allow_html=True)
+        
+        # Textos do Card
+        st.markdown("<div class='titulo-login'>Portal do Professor</div>", unsafe_allow_html=True)
+        st.markdown("<div class='subtitulo-login'>Acesso restrito ao Sistema de Agendamento.</div>", unsafe_allow_html=True)
+        
+        # Botão do Google
+        params = {
+            "client_id": CLIENT_ID, "redirect_uri": REDIRECT_URI,
+            "response_type": "code", "scope": "openid email profile",
+            "access_type": "offline", "prompt": "select_account"
+        }
+        login_url = f"{AUTHORIZATION_URL}?{urllib.parse.urlencode(params)}"
+        google_logo = "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+        
+        st.markdown(f'''
+            <a href="{login_url}" target="_self" style="text-decoration: none; width: 100%;">
+                <div style="display: flex; align-items: center; justify-content: center; background-color: white; color: #757575; padding: 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); width: 100%;">
+                    <img src="{google_logo}" style="width: 20px; height: 20px; margin-right: 12px;">
+                    <span style="font-size: 16px; font-weight: 500; font-family: 'Roboto', sans-serif;">Entrar com o Google</span>
+                </div>
+            </a>
+        ''', unsafe_allow_html=True)
+        
+        # Fechamos o Card
+        st.markdown('</div>', unsafe_allow_html=True)
             
     st.stop()
 
-# --- ÁREA LOGADA ---
+# --- ÁREA LOGADA (O QUE APARECE APÓS O LOGIN) ---
 st.sidebar.image("static/logo.png", width=120)
 st.sidebar.markdown(f"👤 **Bem-vindo(a)**\n\n{st.session_state.user_email}")
 
@@ -131,7 +152,6 @@ if st.sidebar.button("Sair do Sistema"):
     st.session_state.user_email = None
     st.rerun()
 
-st.title("📅 Agendamento de Recursos - FAQUI")
-st.info("O sistema está pronto. Aguardando liberação de acesso no Google Admin.")
-
-# Aqui você pode continuar desenvolvendo a lógica de agendamento na segunda-feira.
+st.title("📅 Painel de Agendamento")
+st.write("Selecione o recurso e o horário desejado.")
+# ... restante do seu código de agendamento ...
