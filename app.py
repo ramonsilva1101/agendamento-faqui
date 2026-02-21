@@ -14,7 +14,7 @@ try:
     CLIENT_SECRET = st.secrets["GOOGLE_CLIENT_SECRET"]
     REDIRECT_URI = st.secrets["REDIRECT_URI"]
 except:
-    st.error("Erro: Configure os Secrets no painel do Streamlit (Client ID e Secret).")
+    st.error("Erro: Configure os Secrets no painel do Streamlit.")
     st.stop()
 
 AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/v2/auth"
@@ -24,16 +24,13 @@ USER_INFO_URL = "https://www.googleapis.com/oauth2/v1/userinfo"
 if "user_email" not in st.session_state:
     st.session_state.user_email = None
 
-# Processar o retorno do Google
+# Processar retorno do Google
 query_params = st.query_params
 if "code" in query_params and st.session_state.user_email is None:
     code = query_params["code"]
     data = {
-        "code": code,
-        "client_id": CLIENT_ID,
-        "client_secret": CLIENT_SECRET,
-        "redirect_uri": REDIRECT_URI,
-        "grant_type": "authorization_code"
+        "code": code, "client_id": CLIENT_ID, "client_secret": CLIENT_SECRET,
+        "redirect_uri": REDIRECT_URI, "grant_type": "authorization_code"
     }
     res = requests.post(TOKEN_URL, data=data)
     if res.status_code == 200:
@@ -44,121 +41,114 @@ if "code" in query_params and st.session_state.user_email is None:
         st.query_params.clear()
         st.rerun()
 
-# --- TELA DE LOGIN ESTILIZADA ---
+# --- TELA DE LOGIN ESTILO "FLOQ" (CARD CENTRALIZADO) ---
 if st.session_state.user_email is None:
-    # CSS para Centralização Absoluta e Fundo Roxo Degradê
-    st.markdown("""
-        <style>
-        #MainMenu {visibility: hidden;}
-        header {visibility: hidden;}
-        footer {visibility: hidden;}
-        
-        /* Fundo com degradê roxo/azul institucional */
-        .stApp {
-            background: linear-gradient(135deg, #2D1B4E 0%, #161B33 100%) !important;
-        }
-
-        /* Container para centralizar o card na vertical e horizontal */
-        .main-wrapper {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 85vh;
-        }
-
-        /* O Card Branco Flutuante */
-        .login-card {
-            background-color: #ffffff;
-            padding: 50px 40px;
-            border-radius: 24px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            text-align: center;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .titulo-card {
-            color: #2D1B4E; /* Roxo escuro para contraste */
-            font-size: 26px;
-            font-weight: 800;
-            margin-top: 20px;
-            margin-bottom: 8px;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .texto-card {
-            color: #64748b;
-            font-size: 15px;
-            margin-bottom: 35px;
-            line-height: 1.5;
-        }
-
-        /* Ajuste fino para o botão do Google */
-        .google-btn-container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-    # Início do Layout
-    st.markdown('<div class="main-wrapper">', unsafe_allow_html=True)
-    st.markdown('<div class="login-card">', unsafe_allow_html=True)
-    
-    # Carregamento da Logo em Base64 para garantir exibição dentro do Card
+    # Lógica para ler a imagem da logo e converter para Base64 (necessário para o HTML)
     try:
         with open("static/logo.png", "rb") as f:
-            data = base64.b64encode(f.read()).decode("utf-8")
-            st.markdown(f'<img src="data:image/png;base64,{data}" style="max-width: 180px; height: auto;">', unsafe_allow_html=True)
+            encoded_logo = base64.b64encode(f.read()).decode()
+            logo_html = f'<img src="data:image/png;base64,{encoded_logo}" style="width: 180px; margin-bottom: 20px;">'
     except:
-        st.markdown("<h1 style='color: #2D1B4E;'>FAQUI</h1>", unsafe_allow_html=True)
+        logo_html = '<h1 style="color: #004A8D; margin-bottom: 20px;">FAQUI</h1>'
 
-    # Conteúdo do Card
-    st.markdown('<div class="titulo-card">Portal do Professor</div>', unsafe_allow_html=True)
-    st.markdown('<div class="texto-card">Sistema de Agendamento de Recursos.<br>Identifique-se para continuar.</div>', unsafe_allow_html=True)
-
-    # Botão de Login do Google
+    # Link do Google
     params = {
         "client_id": CLIENT_ID, "redirect_uri": REDIRECT_URI,
         "response_type": "code", "scope": "openid email profile",
         "access_type": "offline", "prompt": "select_account"
     }
     login_url = f"{AUTHORIZATION_URL}?{urllib.parse.urlencode(params)}"
-    google_logo = "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+    google_icon = "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
 
-    st.markdown(f'''
-        <a href="{login_url}" target="_self" style="text-decoration: none;">
-            <div style="display: flex; align-items: center; justify-content: center; background-color: white; color: #3c4043; padding: 12px 24px; border: 1px solid #dadce0; border-radius: 8px; cursor: pointer; transition: background-color .2s; box-shadow: 0 1px 2px rgba(60,64,67,0.3);">
-                <img src="{google_logo}" style="width: 20px; height: 20px; margin-right: 12px;">
-                <span style="font-size: 16px; font-weight: 500; font-family: 'Google Sans',Roboto,Arial,sans-serif;">Entrar com o Google</span>
+    # CSS Customizado
+    st.markdown(f"""
+        <style>
+        #MainMenu {{visibility: hidden;}}
+        header {{visibility: hidden;}}
+        footer {{visibility: hidden;}}
+        
+        /* Fundo em degradê roxo/azul */
+        .stApp {{
+            background: linear-gradient(180deg, #1a2a6c 0%, #2D1B4E 50%, #000000 100%) !important;
+        }}
+
+        /* Container Principal */
+        .login-wrapper {{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100%;
+        }}
+
+        /* O Card estilo FLOQ */
+        .login-card {{
+            background-color: white;
+            padding: 50px 40px;
+            border-radius: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            text-align: center;
+            width: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }}
+
+        .welcome-text {{
+            color: #333;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-family: 'Segoe UI', sans-serif;
+        }}
+
+        .sub-text {{
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 40px;
+        }}
+
+        .google-btn {{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            color: #555;
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }}
+
+        .google-btn:hover {{
+            background-color: #f8f9fa;
+            border-color: #ccc;
+        }}
+        </style>
+
+        <div class="login-wrapper">
+            <div class="login-card">
+                {logo_html}
+                <div class="welcome-text">Bem-vindo</div>
+                <div class="sub-text">Acesso restrito ao Sistema de Agendamento</div>
+                <a href="{login_url}" class="google-btn" target="_self">
+                    <img src="{google_icon}" style="width: 20px; margin-right: 15px;">
+                    Entrar com o Google
+                </a>
             </div>
-        </a>
-    ''', unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True) # Fecha Card
-    st.markdown('</div>', unsafe_allow_html=True) # Fecha Wrapper
-            
+        </div>
+    """, unsafe_allow_html=True)
     st.stop()
 
-# --- ÁREA LOGADA (PAINEL INTERNO) ---
+# --- ÁREA LOGADA ---
+st.title("📅 Painel de Agendamento")
 st.sidebar.image("static/logo.png", width=120)
-st.sidebar.markdown(f"**Professor(a):**\n{st.session_state.user_email}")
-
-if st.sidebar.button("Encerrar Sessão"):
+st.sidebar.write(f"Conectado como: {st.session_state.user_email}")
+if st.sidebar.button("Sair"):
     st.session_state.user_email = None
     st.rerun()
-
-st.title("📅 Painel de Agendamento")
-st.write("Bem-vindo ao sistema de agendamento da FAQUI.")
-
-# Exemplo de formulário de reserva
-col_a, col_b = st.columns(2)
-with col_a:
-    recurso = st.selectbox("Recurso:", ["Laboratório 01", "Projetor", "Auditório"])
-with col_b:
-    data = st.date_input("Data:", datetime.now())
-
-if st.button("Reservar Agora"):
-    st.success(f"Solicitação de {recurso} enviada com sucesso!")
