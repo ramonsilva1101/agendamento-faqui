@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import urllib.parse
 import requests
+import base64
 from datetime import datetime
 
 # 1. CONFIGURAÇÃO DA PÁGINA
@@ -13,7 +14,7 @@ try:
     CLIENT_SECRET = st.secrets["GOOGLE_CLIENT_SECRET"]
     REDIRECT_URI = st.secrets["REDIRECT_URI"]
 except:
-    st.error("Erro: Configure os Secrets no painel do Streamlit.")
+    st.error("Erro: Configure os Secrets no painel do Streamlit (Client ID e Secret).")
     st.stop()
 
 AUTHORIZATION_URL = "https://accounts.google.com/o/oauth2/v2/auth"
@@ -43,115 +44,121 @@ if "code" in query_params and st.session_state.user_email is None:
         st.query_params.clear()
         st.rerun()
 
-# --- TELA DE LOGIN (CARD BRANCO COM FUNDO AZUL) ---
+# --- TELA DE LOGIN ESTILIZADA ---
 if st.session_state.user_email is None:
-    # Injeção de CSS Avançado para Centralização Total e Cores
+    # CSS para Centralização Absoluta e Fundo Roxo Degradê
     st.markdown("""
         <style>
         #MainMenu {visibility: hidden;}
         header {visibility: hidden;}
         footer {visibility: hidden;}
         
-        /* Fundo Azul Institucional */
+        /* Fundo com degradê roxo/azul institucional */
         .stApp {
-            background: linear-gradient(135deg, #004A8D 0%, #002D57 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background: linear-gradient(135deg, #2D1B4E 0%, #161B33 100%) !important;
         }
 
-        /* Container Principal do Card */
-        .main-container {
+        /* Container para centralizar o card na vertical e horizontal */
+        .main-wrapper {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            width: 100%;
+            height: 85vh;
         }
 
-        /* Estilo do Card Branco */
+        /* O Card Branco Flutuante */
         .login-card {
             background-color: #ffffff;
-            padding: 50px 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            padding: 50px 40px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
             text-align: center;
             width: 100%;
             max-width: 400px;
+        }
+
+        .titulo-card {
+            color: #2D1B4E; /* Roxo escuro para contraste */
+            font-size: 26px;
+            font-weight: 800;
+            margin-top: 20px;
+            margin-bottom: 8px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .texto-card {
+            color: #64748b;
+            font-size: 15px;
+            margin-bottom: 35px;
+            line-height: 1.5;
+        }
+
+        /* Ajuste fino para o botão do Google */
+        .google-btn-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        /* Ajuste da logo dentro do card */
-        .logo-img {
-            max-width: 200px;
-            margin-bottom: 20px;
-        }
-
-        .titulo-login {
-            color: #004A8D;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-            font-family: 'sans-serif';
-        }
-
-        .subtitulo-login {
-            color: #6b7280;
-            font-size: 14px;
-            margin-bottom: 30px;
+            justify-content: center;
+            width: 100%;
         }
         </style>
         """, unsafe_allow_html=True)
 
-    # Construção do Layout centralizado usando Colunas para "empurrar" pro meio
-    empty1, central_col, empty2 = st.columns([0.1, 0.8, 0.1])
+    # Início do Layout
+    st.markdown('<div class="main-wrapper">', unsafe_allow_html=True)
+    st.markdown('<div class="login-card">', unsafe_allow_html=True)
     
-    with central_col:
-        # Iniciamos o Card
-        st.markdown('<div class="login-card">', unsafe_allow_html=True)
-        
-        # Logo Centralizada (usamos st.image com container_width=False para não esticar)
-        try:
-            st.image("static/logo.png", width=220)
-        except:
-            st.markdown("<h1 style='color: #004A8D;'>FAQUI</h1>", unsafe_allow_html=True)
-        
-        # Textos do Card
-        st.markdown("<div class='titulo-login'>Portal do Professor</div>", unsafe_allow_html=True)
-        st.markdown("<div class='subtitulo-login'>Acesso restrito ao Sistema de Agendamento.</div>", unsafe_allow_html=True)
-        
-        # Botão do Google
-        params = {
-            "client_id": CLIENT_ID, "redirect_uri": REDIRECT_URI,
-            "response_type": "code", "scope": "openid email profile",
-            "access_type": "offline", "prompt": "select_account"
-        }
-        login_url = f"{AUTHORIZATION_URL}?{urllib.parse.urlencode(params)}"
-        google_logo = "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
-        
-        st.markdown(f'''
-            <a href="{login_url}" target="_self" style="text-decoration: none; width: 100%;">
-                <div style="display: flex; align-items: center; justify-content: center; background-color: white; color: #757575; padding: 12px; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.1); width: 100%;">
-                    <img src="{google_logo}" style="width: 20px; height: 20px; margin-right: 12px;">
-                    <span style="font-size: 16px; font-weight: 500; font-family: 'Roboto', sans-serif;">Entrar com o Google</span>
-                </div>
-            </a>
-        ''', unsafe_allow_html=True)
-        
-        # Fechamos o Card
-        st.markdown('</div>', unsafe_allow_html=True)
+    # Carregamento da Logo em Base64 para garantir exibição dentro do Card
+    try:
+        with open("static/logo.png", "rb") as f:
+            data = base64.b64encode(f.read()).decode("utf-8")
+            st.markdown(f'<img src="data:image/png;base64,{data}" style="max-width: 180px; height: auto;">', unsafe_allow_html=True)
+    except:
+        st.markdown("<h1 style='color: #2D1B4E;'>FAQUI</h1>", unsafe_allow_html=True)
+
+    # Conteúdo do Card
+    st.markdown('<div class="titulo-card">Portal do Professor</div>', unsafe_allow_html=True)
+    st.markdown('<div class="texto-card">Sistema de Agendamento de Recursos.<br>Identifique-se para continuar.</div>', unsafe_allow_html=True)
+
+    # Botão de Login do Google
+    params = {
+        "client_id": CLIENT_ID, "redirect_uri": REDIRECT_URI,
+        "response_type": "code", "scope": "openid email profile",
+        "access_type": "offline", "prompt": "select_account"
+    }
+    login_url = f"{AUTHORIZATION_URL}?{urllib.parse.urlencode(params)}"
+    google_logo = "https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg"
+
+    st.markdown(f'''
+        <a href="{login_url}" target="_self" style="text-decoration: none;">
+            <div style="display: flex; align-items: center; justify-content: center; background-color: white; color: #3c4043; padding: 12px 24px; border: 1px solid #dadce0; border-radius: 8px; cursor: pointer; transition: background-color .2s; box-shadow: 0 1px 2px rgba(60,64,67,0.3);">
+                <img src="{google_logo}" style="width: 20px; height: 20px; margin-right: 12px;">
+                <span style="font-size: 16px; font-weight: 500; font-family: 'Google Sans',Roboto,Arial,sans-serif;">Entrar com o Google</span>
+            </div>
+        </a>
+    ''', unsafe_allow_html=True)
+
+    st.markdown('</div>', unsafe_allow_html=True) # Fecha Card
+    st.markdown('</div>', unsafe_allow_html=True) # Fecha Wrapper
             
     st.stop()
 
-# --- ÁREA LOGADA (O QUE APARECE APÓS O LOGIN) ---
+# --- ÁREA LOGADA (PAINEL INTERNO) ---
 st.sidebar.image("static/logo.png", width=120)
-st.sidebar.markdown(f"👤 **Bem-vindo(a)**\n\n{st.session_state.user_email}")
+st.sidebar.markdown(f"**Professor(a):**\n{st.session_state.user_email}")
 
-if st.sidebar.button("Sair do Sistema"):
+if st.sidebar.button("Encerrar Sessão"):
     st.session_state.user_email = None
     st.rerun()
 
 st.title("📅 Painel de Agendamento")
-st.write("Selecione o recurso e o horário desejado.")
-# ... restante do seu código de agendamento ...
+st.write("Bem-vindo ao sistema de agendamento da FAQUI.")
+
+# Exemplo de formulário de reserva
+col_a, col_b = st.columns(2)
+with col_a:
+    recurso = st.selectbox("Recurso:", ["Laboratório 01", "Projetor", "Auditório"])
+with col_b:
+    data = st.date_input("Data:", datetime.now())
+
+if st.button("Reservar Agora"):
+    st.success(f"Solicitação de {recurso} enviada com sucesso!")
